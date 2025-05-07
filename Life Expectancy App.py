@@ -101,9 +101,9 @@ FEATURE_LIST = [
 
 # right after you load `df` and define FEATURE_LIST:
 feature_means = df[FEATURE_LIST].mean().to_dict()
-# 8️⃣ Load world shapefile
+
 world = gpd.read_file(
-    r"C:\Users\jueva\OneDrive\Documents\FYP\naturalearth_lowres\ne_110m_admin_0_countries.shp"
+    r"naturalearth_lowres/ne_110m_admin_0_countries.shp"
 )
 # Ensure a proper ISO3 key
 if 'iso_a3' in world.columns:
