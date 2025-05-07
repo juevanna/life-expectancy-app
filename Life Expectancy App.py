@@ -19,7 +19,7 @@ from sklearn.preprocessing import StandardScaler
 
 # 2️⃣ Load models & scaler
 lr_model  = joblib.load("linear_regression_model.pkl")
-rf_model  = joblib.load("random_forest_model.pkl")
+rf_model  = joblib.load("random_forest_model_compressed.pkl")
 gb_model  = joblib.load("gradient_boosting_model.pkl")
 xgb_model = joblib.load("xgboost_model.pkl")
 nn_model  = joblib.load("neural_network_model.pkl")
