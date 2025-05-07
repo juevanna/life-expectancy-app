@@ -25,8 +25,9 @@ nn_model  = joblib.load("model/neural_network_model.pkl")
 svr_model = joblib.load("model/svr_model.pkl")
 scaler    = joblib.load("model/scaler.pkl")
 
-# 3️⃣ Load your pivoted dataset
-df = pd.read_csv(r"C:\Users\jueva\OneDrive\Documents\FYP\pivoted_dataset.csv")
+# new—load from the `data/` folder alongside your app
+df = pd.read_csv("dataset/pivoted_dataset.csv")
+
 
 # 4️⃣ Map country names → ISO3
 def get_iso3(name):
