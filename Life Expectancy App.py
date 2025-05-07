@@ -17,14 +17,13 @@ import pycountry
 from sklearn.preprocessing import StandardScaler
 
 
-# 2️⃣ Load models & scaler
-lr_model  = joblib.load("linear_regression_model.pkl")
-rf_model  = joblib.load("random_forest_model_compressed.pkl")
-gb_model  = joblib.load("gradient_boosting_model.pkl")
-xgb_model = joblib.load("xgboost_model.pkl")
-nn_model  = joblib.load("neural_network_model.pkl")
-svr_model = joblib.load("svr_model.pkl")
-scaler    = joblib.load("scaler.pkl")
+lr_model  = joblib.load("models/linear_regression_model.pkl")
+rf_model  = joblib.load("models/random_forest_model_compressed.pkl")
+gb_model  = joblib.load("models/gradient_boosting_model.pkl")
+xgb_model = joblib.load("models/xgboost_model.pkl")
+nn_model  = joblib.load("models/neural_network_model.pkl")
+svr_model = joblib.load("models/svr_model.pkl")
+scaler    = joblib.load("models/scaler.pkl")
 
 # 3️⃣ Load your pivoted dataset
 df = pd.read_csv(r"C:\Users\jueva\OneDrive\Documents\FYP\pivoted_dataset.csv")
