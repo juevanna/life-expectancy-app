@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[6]:
 
-
-# 1️⃣ Imports
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -25,11 +22,11 @@ nn_model  = joblib.load("model/neural_network_model.pkl")
 svr_model = joblib.load("model/svr_model.pkl")
 scaler    = joblib.load("model/scaler.pkl")
 
-# new—load from the `data/` folder alongside your app
+
 df = pd.read_csv("dataset/pivoted_dataset.csv")
 
 
-# 4️⃣ Map country names → ISO3
+
 def get_iso3(name):
     try:
         return pycountry.countries.lookup(name).alpha_3
@@ -38,7 +35,6 @@ def get_iso3(name):
 
 df["ISO3"] = df["GEO_NAME_SHORT"].apply(get_iso3)
 
-# 5️⃣ Fix known exceptions
 country_iso_map = {
     "Bolivia (Plurinational State of)": "BOL",
     "Venezuela (Bolivarian Republic of)": "VEN",
@@ -49,7 +45,6 @@ country_iso_map = {
 }
 df["ISO3"] = df["ISO3"].fillna(df["GEO_NAME_SHORT"].map(country_iso_map))
 
-# 6️⃣ Grab latest year per country
 latest = (
     df
     .sort_values("DIM_TIME")
@@ -57,7 +52,6 @@ latest = (
     .last()
 )
 
-# 7️⃣ Build the full feature list (38 features)
 FEATURE_LIST = [
     'Air pollution deaths (age-standardized) - RATE_PER_100000_N',
     'Alcohol consumption (age 15+) - RATE_PER_CAPITA_N',
@@ -99,7 +93,7 @@ FEATURE_LIST = [
     'Wasting in children (under 5) - RATE_PER_100_N'
 ]
 
-# right after you load `df` and define FEATURE_LIST:
+
 feature_means = df[FEATURE_LIST].mean().to_dict()
 
 world = gpd.read_file(
@@ -115,20 +109,16 @@ elif 'ADM0_A3' in world.columns:
 else:
     st.error("No ISO3 field found in world shapefile!")
 
-# drop duplicates of the old field if you like
+
 for c in ('iso_a3','ISO_A3','ADM0_A3'):
     if c in world.columns:
         world.drop(columns=[c], inplace=True)
 
-# … and then your Tab 2 code that does:
-# geo = world.merge(latest, on="ISO3", how="left")
-
-# … all your imports, model loading, FEATURE_LIST, scaler, latest, world, etc. …
 
 st.title("Life Expectancy Prediction")
 tab1, tab2 = st.tabs(["Manual Input", "World Map"])
 
-##### Tab 1: Country‐Specific Prediction #####
+#Tab 1: Country‐Specific Prediction
 with tab1:
     st.header("Country-Specific Life Expectancy Prediction")
 
@@ -145,10 +135,9 @@ with tab1:
         key="tab1_country"
 )
 
-# 2) Grab that country’s latest row
+
     country_row = latest[latest["GEO_NAME_SHORT"] == country_choice].iloc[0]
 
-# 3) Sliders in 4 columns, default from country or global mean
     cols = st.columns(4)
     data = {}
     for i, feat in enumerate(FEATURE_LIST):
@@ -159,14 +148,14 @@ with tab1:
         data[feat] = cols[i % 4].number_input(label, min_value=0.0, value=float(val))
     input_df = pd.DataFrame(data, index=[0])
 
-# 4) Prepare & scale
+
     X_raw = input_df.values
     if model_choice in ("Linear Regression", "Neural Network", "Support Vector Regression"):
         X_pred = scaler.transform(X_raw)
     else:
         X_pred = X_raw
 
-# 5) Predict & clamp
+
     model_dict = {
         "Linear Regression": lr_model,
         "Random Forest": rf_model,
@@ -178,23 +167,22 @@ with tab1:
     raw_pred = model_dict[model_choice].predict(X_pred)[0]
     pred_value = max(0.0, min(float(raw_pred), 120.0))
 
-# 6) Look up actual if available
     life_cols = [c for c in latest.columns if "life expectancy" in c.lower()]
     if life_cols:
         actual = country_row[life_cols[0]]
     else:
         actual = None
 
-    # 7) Country name as header
+
     st.header(f"{country_choice} Predicted Life Expectancy")
 
-# 8) Predicted value as an H2 (big)
+
     st.markdown(f"## {pred_value:.2f} years")
 
-# 9) Percent change as normal text
+
     if actual is not None:
         st.markdown(f"*This is a {abs(pct):.2f}% overall {direction}*")
-##### Tab 2: World Map #####
+#Tab 2: World Map 
 with tab2:
     st.header("Global Predictions Map")
 
@@ -212,16 +200,14 @@ with tab2:
         key="tab2_model"
     )
 
-    # 2) Prepare and impute the country-level features
     latest_feats = latest[FEATURE_LIST].copy()
     latest_feats.fillna(latest_feats.mean(), inplace=True)
     X_ctry = latest_feats.values
 
-    # 3) Scale for models trained on scaled data
+
     if map_model_choice in ("Linear Regression", "Neural Network", "Support Vector Regression"):
         X_ctry = scaler.transform(X_ctry)
 
-    # 4) Predict for every country and round to two decimals
     model_dict = {
         "Linear Regression": lr_model,
         "Random Forest": rf_model,
@@ -233,16 +219,14 @@ with tab2:
     raw_preds = model_dict[map_model_choice].predict(X_ctry)
     latest["predicted_life_expectancy"] = np.round(raw_preds, 2)
 
-    # 5) Merge predictions with your world GeoDataFrame
     geo = world.merge(latest, on="ISO3", how="left")
 
-    # 6) Build a string column and override Greenland only
     geo["predicted_life_expectancy_str"] = geo["predicted_life_expectancy"]\
         .map(lambda x: f"{x:.2f}" if pd.notna(x) else None)
     geo["tooltip_text"] = geo["predicted_life_expectancy_str"]
     geo.loc[geo["ISO3"] == "GRL", "tooltip_text"] = "No data available"
 
-    # 7) Create and display the PyDeck layer
+
     layer = pdk.Layer(
         "GeoJsonLayer",
         geo.__geo_interface__,
@@ -258,7 +242,6 @@ with tab2:
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view, tooltip=tooltip))
 
 
-# In[ ]:
 
 
 
