@@ -235,5 +235,45 @@ with tab2:
     }
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view, tooltip=tooltip))
 with tab3:
-    st.header("Feature Correlation Matrix")
-    st.image("assets/feature_life_expectancy_corr.png", use_container_width=True)
+    st.header("Feature Correlation with Life Expectancy")
+
+    # 1) Build the latest-per-country DataFrame with the true target
+    data = (
+        df
+        .sort_values("DIM_TIME")
+        .groupby("ISO3", as_index=False)
+        .last()
+        .set_index("ISO3")
+    )
+    target_col = "Life expectancy (at birth)"
+
+    # 2) Compute Pearson correlations
+    corrs = {
+        feat: data[[feat, target_col]]
+                .dropna()[feat]
+                .corr(data[[feat, target_col]].dropna()[target_col])
+        for feat in FEATURE_LIST
+    }
+    corr_series = pd.Series(corrs).sort_values()
+
+    # 3) Plot dynamically with high DPI and bar-labels
+    fig, ax = plt.subplots(figsize=(6, 10), dpi=150)
+    bars = ax.barh(corr_series.index, corr_series.values, color="steelblue")
+    ax.set_title("Pearson Correlation with Life Expectancy", fontsize=16)
+    ax.set_xlabel("Correlation coefficient", fontsize=14)
+    ax.tick_params(axis="y", labelsize=10)
+    ax.tick_params(axis="x", labelsize=12)
+
+    # 4) Annotate each bar with its value
+    for bar in bars:
+        w = bar.get_width()
+        ax.text(
+            w + (0.01 if w >= 0 else -0.01),
+            bar.get_y() + bar.get_height()/2,
+            f"{w:.2f}",
+            va="center",
+            fontsize=10
+        )
+
+    st.pyplot(fig, use_container_width=True)
+
