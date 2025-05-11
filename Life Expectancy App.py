@@ -95,7 +95,7 @@ feature_means = df[FEATURE_LIST].mean().to_dict()
 world = gpd.read_file(
     r"naturalearth_lowres/ne_110m_admin_0_countries.shp"
 )
-# Ensure a proper ISO3 key
+
 if 'iso_a3' in world.columns:
     world['ISO3'] = world['iso_a3']
 elif 'ISO_A3' in world.columns:
@@ -112,13 +112,11 @@ for c in ('iso_a3','ISO_A3','ADM0_A3'):
 
 
 st.title("Life Expectancy Prediction")
-tab1, tab2 = st.tabs(["Manual Input", "World Map"])
-
-#Tab 1: Country‐Specific Prediction
+tab1, tab2, tab3 = st.tabs(["Manual Input", "World Map", "Feature Importance"])
 with tab1:
     st.header("Country-Specific Life Expectancy Prediction")
 
-    # 1) Model & country pickers
+    
     model_choice = st.selectbox(
         "Select Model",
         ["Linear Regression", "Random Forest", "Gradient Boosting", 
@@ -178,11 +176,11 @@ with tab1:
 
     if actual is not None:
         st.markdown(f"*This is a {abs(pct):.2f}% overall {direction}*")
-#Tab 2: World Map 
+
 with tab2:
     st.header("Global Predictions Map")
 
-    # 1) Choose the model for the map
+    
     map_model_choice = st.selectbox(
         "Choose Model for Map",
         [
@@ -236,3 +234,6 @@ with tab2:
         "style": {"backgroundColor": "steelblue", "color": "white"}
     }
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view, tooltip=tooltip))
+with tab3:
+    st.header("Feature Correlation Matrix")
+    st.image(r"C:\Users\jueva\assets\feature_life_expectancy_corr.png", width=1000)
