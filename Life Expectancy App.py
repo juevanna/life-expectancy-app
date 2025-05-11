@@ -234,7 +234,9 @@ with tab2:
         "style": {"backgroundColor": "steelblue", "color": "white"}
     }
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view, tooltip=tooltip))
-st.image(
+with tab3:
+    st.header("Feature Correlation Matrix")
+    st.image(
     "assets/feature_life_expectancy_corr.png",
     width=1000,                
     use_container_width=True
