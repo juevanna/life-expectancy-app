@@ -49,7 +49,7 @@ latest = (
 )
 
 FEATURE_LIST = [
-    'Air pollution deaths (age-standardized) - RATE_PER_100000_N',
+    'Air pollution deaths (age-standardized per 100000) ,
     'Alcohol consumption (age 15+) - RATE_PER_CAPITA_N',
     'Births attended by health personnel - RATE_PER_100_N',
     'DTP3 immunization coverage (age 1) - RATE_PER_100_N',
