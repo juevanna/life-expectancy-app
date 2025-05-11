@@ -236,4 +236,4 @@ with tab2:
     st.pydeck_chart(pdk.Deck(layers=[layer], initial_view_state=view, tooltip=tooltip))
 with tab3:
     st.header("Feature Correlation Matrix")
-    st.image("assets/feature_life_expectancy_corr.png", width=1000)
+    st.image("assets/feature_life_expectancy_corr.png",use_column_width=True)
